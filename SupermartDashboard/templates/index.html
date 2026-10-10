@@ -1,0 +1,302 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Supermart Grocery Sales Dashboard</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="header">
+    <div>
+        <h2>Supermart Analytics</h2>
+        <p>Retail business intelligence dashboard</p>
+    </div>
+    <span class="tag">DATA ANALYTICS</span>
+</header>
+
+<main class="container">
+
+    <section class="hero">
+        <div>
+            <p class="eyebrow">BUSINESS PERFORMANCE</p>
+            <h1>Supermart Grocery<br>
+                <span>Sales Dashboard</span></h1>
+            <p class="muted">
+                Analyze sales, profit, products, discounts and locations.
+            </p>
+        </div>
+        <div class="hero-card">
+            <p>RECORDS IN VIEW</p>
+            <strong>{{ "{:,}".format(row_count) }}</strong>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Dashboard Filters</h2>
+        <form method="get" action="/">
+            <div class="filters">
+                <label>Start date
+                    <input type="date" name="start" value="{{ start }}">
+                </label>
+                <label>End date
+                    <input type="date" name="end" value="{{ end }}">
+                </label>
+            </div>
+
+            <div class="filter-groups">
+                <fieldset>
+                    <legend>Categories</legend>
+                    {% for item in categories %}
+                    <label class="option">
+                        <input type="checkbox" name="category"
+                               value="{{ item }}"
+                               {% if item in selected_categories %}checked{% endif %}>
+                        {{ item }}
+                    </label>
+                    {% endfor %}
+                </fieldset>
+
+                <fieldset>
+                    <legend>Regions</legend>
+                    {% for item in regions %}
+                    <label class="option">
+                        <input type="checkbox" name="region"
+                               value="{{ item }}"
+                               {% if item in selected_regions %}checked{% endif %}>
+                        {{ item }}
+                    </label>
+                    {% endfor %}
+                </fieldset>
+
+                <fieldset>
+                    <legend>Cities</legend>
+                    <div class="city-list">
+                    {% for item in cities %}
+                    <label class="option">
+                        <input type="checkbox" name="city"
+                               value="{{ item }}"
+                               {% if item in selected_cities %}checked{% endif %}>
+                        {{ item }}
+                    </label>
+                    {% endfor %}
+                    </div>
+                </fieldset>
+            </div>
+
+            <button type="submit">Apply Filters</button>
+            <a class="reset" href="/">Reset</a>
+        </form>
+    </section>
+
+    {% if empty %}
+        <section class="panel">
+            <h2>No matching records</h2>
+            <p>Choose at least one category, region and city.</p>
+        </section>
+    {% else %}
+
+    <section class="kpis">
+        <article class="kpi">
+            <p>Total Sales</p>
+            <h2>{{ sales }}</h2>
+        </article>
+        <article class="kpi">
+            <p>Total Profit</p>
+            <h2>{{ profit }}</h2>
+        </article>
+        <article class="kpi">
+            <p>Unique Orders</p>
+            <h2>{{ order_count }}</h2>
+        </article>
+        <article class="kpi">
+            <p>Profit Margin</p>
+            <h2>{{ margin }}</h2>
+        </article>
+        <article class="kpi">
+            <p>Average Discount</p>
+            <h2>{{ average_discount }}</h2>
+        </article>
+    </section>
+
+    <section class="section-title">
+        <p class="eyebrow">01 / OVERVIEW</p>
+        <h2>Overall Sales Performance</h2>
+    </section>
+
+    <section class="charts">
+        <article class="panel">
+            <h3>Sales by Category</h3>
+            {% for bar in category_bars %}
+            <div class="bar-item">
+                <div class="bar-label">
+                    <span>{{ bar.label }}</span>
+                    <b>{{ bar.value }}</b>
+                </div>
+                <div class="track">
+                    <div class="bar blue"
+                         style="width:{{ bar.width }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </article>
+
+        <article class="panel">
+            <h3>Sales by Region</h3>
+            {% for bar in region_bars %}
+            <div class="bar-item">
+                <div class="bar-label">
+                    <span>{{ bar.label }}</span>
+                    <b>{{ bar.value }}</b>
+                </div>
+                <div class="track">
+                    <div class="bar purple"
+                         style="width:{{ bar.width }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </article>
+
+        <article class="panel full">
+            <h3>Monthly Sales Trend</h3>
+            {% for bar in monthly_bars %}
+            <div class="bar-item">
+                <div class="bar-label">
+                    <span>{{ bar.label }}</span>
+                    <b>{{ bar.value }}</b>
+                </div>
+                <div class="track">
+                    <div class="bar teal"
+                         style="width:{{ bar.width }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </article>
+    </section>
+
+    <section class="section-title">
+        <p class="eyebrow">02 / PRODUCTS</p>
+        <h2>Product Performance</h2>
+    </section>
+
+    <section class="panel">
+        <h3>Top Product Subcategories</h3>
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Subcategory</th>
+                    <th>Sales</th>
+                    <th>Profit</th>
+                    <th>Orders</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for p in products %}
+                <tr>
+                    <td>{{ p["Category"] }}</td>
+                    <td>{{ p["Sub Category"] }}</td>
+                    <td>{{ "{:,.2f}".format(p["Sales"]) }}</td>
+                    <td>{{ "{:,.2f}".format(p["Profit"]) }}</td>
+                    <td>{{ p["Orders"] }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </section>
+
+    <section class="section-title">
+        <p class="eyebrow">03 / DISCOUNTS</p>
+        <h2>Discount and Profit Analysis</h2>
+    </section>
+
+    <section class="charts">
+        <article class="panel">
+            <h3>Profit by Discount Band</h3>
+            {% for bar in discount_bars %}
+            <div class="bar-item">
+                <div class="bar-label">
+                    <span>{{ bar.label }}</span>
+                    <b>{{ bar.value }}</b>
+                </div>
+                <div class="track">
+                    <div class="bar orange"
+                         style="width:{{ bar.width }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </article>
+
+        <article class="panel">
+            <h3>Discount vs Profit</h3>
+            <div class="big-number">{{ correlation }}</div>
+            <p class="muted">
+                Pearson correlation between discount and profit.
+                Correlation does not prove causation.
+            </p>
+        </article>
+    </section>
+
+    <section class="section-title">
+        <p class="eyebrow">04 / GEOGRAPHY</p>
+        <h2>Geographic Performance</h2>
+    </section>
+
+    {% if state_count == 1 %}
+    <p class="notice">
+        Only one state is present in this dataset.
+        State-to-state comparisons are not possible.
+    </p>
+    {% endif %}
+
+    <section class="panel">
+        <h3>Top Cities by Sales</h3>
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>State</th>
+                    <th>City</th>
+                    <th>Region</th>
+                    <th>Sales</th>
+                    <th>Profit</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for g in geography %}
+                <tr>
+                    <td>{{ g["State"] }}</td>
+                    <td>{{ g["City"] }}</td>
+                    <td>{{ g["Region"] }}</td>
+                    <td>{{ "{:,.2f}".format(g["Sales"]) }}</td>
+                    <td>{{ "{:,.2f}".format(g["Profit"]) }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </section>
+
+    {% endif %}
+
+    <section class="panel notes">
+        <h3>Data Notes</h3>
+        <p>Dates are parsed from mixed date formats.</p>
+        <p>The CSV does not specify currency; ₹ is a display convention.</p>
+        <p>The North region has only one record in the supplied dataset.</p>
+        <p>Discount analysis is descriptive, not proof of cause and effect.</p>
+    </section>
+
+</main>
+
+<footer>
+    Supermart Grocery Sales Dashboard · Python + Flask + HTML + CSS
+</footer>
+
+</body>
+</html>
